@@ -23,3 +23,7 @@ egui_kittest = { workspace = true, features = ["wgpu", "snapshot"] }
 [build-dependencies]
 serde_json = { workspace = true }
 toml = "1"
+
+[features]
+# SimpleHub build: user-facing name "Simple Sheets", About dialog credits GridCraft.
+simplehub = []

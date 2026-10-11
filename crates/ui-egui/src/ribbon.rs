@@ -1577,13 +1577,13 @@ fn automate(app: &mut SheetApp, ui: &mut Ui) {
     if big_button(ui, Icon::Script, "Command\nPalette", "Search and run any command", false).clicked() {
         app.open_dialog("commandSearch", json!({}));
     }
-    if big_button(ui, Icon::Script, "Agent\nControl", "How agents drive GridCraft (MCP / control channel)", false).clicked() {
+    if big_button(ui, Icon::Script, "Agent\nControl", &format!("How agents drive {} (MCP / control channel)", crate::APP_NAME), false).clicked() {
         app.open_dialog("agents", json!({}));
     }
     if big_button(ui, Icon::Script, "Action\nJournal", "Every command run in this session (replayable)", false).clicked() {
         app.open_dialog("journal", json!({}));
     }
-    if big_button(ui, Icon::Script, "About\nGridCraft", "Version, contributors and the AI models that helped", false).clicked() {
+    if big_button(ui, Icon::Script, &format!("About\n{}", crate::APP_NAME), "Version, contributors and the AI models that helped", false).clicked() {
         app.open_dialog("about", json!({}));
     }
 }

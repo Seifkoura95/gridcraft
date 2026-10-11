@@ -504,7 +504,7 @@ impl Dialog {
             "commandSearch" => Dialog::custom("commandSearch", "Search Commands", json!({})),
             "agents" => Dialog::custom("agents", "Agent Control", json!({})),
             "about" => {
-                let mut d = Dialog::custom("about", "About GridCraft", json!({}));
+                let mut d = Dialog::custom("about", &format!("About {}", crate::APP_NAME), json!({}));
                 d.tab = match p("tab").as_str() {
                     Some(t @ ("Contributors" | "Models")) => t.to_string(),
                     _ => "About".into(),
@@ -552,7 +552,7 @@ impl Dialog {
             "pickList" => Dialog::custom("pickList", "Pick From List", json!({})),
             "saveCopy" => Dialog::custom("saveCopy", "Save a Copy", json!({"format": p("format")})),
             "saveChanges" => Dialog::custom("saveChanges", "Save Changes?", json!({"title": p("title")})),
-            "start" => Dialog::custom("start", "GridCraft", json!({})),
+            "start" => Dialog::custom("start", crate::APP_NAME, json!({})),
             "comments" => {
                 app.grid.pane = Some("comments".into());
                 return None;
@@ -662,7 +662,7 @@ pub fn show(app: &mut SheetApp, ctx: &egui::Context) {
                 "goalSeek" => goal_seek(app, ui, &mut d, &mut confirm),
                 "spelling" => spelling(app, ui, &mut d, &mut open),
                 "agents" => {
-                    ui.label("GridCraft is fully drivable by agents. Every menu item, button and gesture is a command:");
+                    ui.label(format!("{} is fully drivable by agents. Every menu item, button and gesture is a command:", crate::APP_NAME));
                     ui.add_space(4.0);
                     ui.monospace("gridcraft --control 7979        # JSON-lines control channel\ngridcraft-cli mcp --connect 7979   # MCP bridged to this window\ngridcraft-cli mcp                   # headless MCP server");
                     ui.add_space(4.0);
@@ -914,6 +914,17 @@ fn about(ui: &mut egui::Ui, d: &mut Dialog) {
     match d.tab.as_str() {
         "Contributors" => crate::credits::contributors_ui(ui),
         "Models" => crate::credits::models_ui(ui),
+        _ if cfg!(feature = "simplehub") => {
+            // SimpleHub build. GridCraft is MIT OR Apache-2.0; the licence asks for
+            // attribution and the ArtCraft marks are left out (they are not open source).
+            ui.heading(crate::APP_NAME);
+            ui.label(format!("Version {}", env!("CARGO_PKG_VERSION")));
+            ui.add_space(4.0);
+            ui.label("Spreadsheets for SimpleHub. Native XLSX, 500+ functions, charts and PivotTables.");
+            ui.add_space(4.0);
+            ui.label("Built on GridCraft, an open source spreadsheet by the ArtCraft Team and the GridCraft contributors, used under the MIT or Apache 2.0 licence.");
+            ui.hyperlink_to("github.com/storytold/gridcraft", "https://github.com/storytold/gridcraft");
+        }
         _ => {
             ui.heading("GridCraft");
             ui.label(format!("Version {}", env!("CARGO_PKG_VERSION")));
