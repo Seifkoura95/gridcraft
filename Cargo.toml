@@ -27,6 +27,8 @@ gridcraft-pdf = { path = "crates/pdf" }
 
 # foundation
 thiserror = "2"
+# std::time on native; performance.now() on wasm32, where std::time::Instant panics.
+web-time = "1"
 serde = { version = "1", features = ["derive", "rc"] }
 serde_json = { version = "1", features = ["float_roundtrip"] }
 log = "0.4"

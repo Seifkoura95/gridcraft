@@ -218,7 +218,7 @@ pub(crate) fn edit<R>(s: &mut Session, f: impl FnOnce(&mut Ctx) -> Result<R>) ->
 
 pub(crate) fn commit<R>(d: &mut DocState, f: impl FnOnce(&mut Ctx) -> Result<R>) -> Result<R> {
     let prof = std::env::var_os("GRIDCRAFT_PROFILE").is_some();
-    let t0 = std::time::Instant::now();
+    let t0 = web_time::Instant::now();
     let mut sel = d.selection.clone();
     let mut ctx = Ctx { wb: (*d.wb).clone(), changed: Vec::new(), structural: false, sel: &mut sel, fit_rows: Vec::new() };
     let r = f(&mut ctx)?;
