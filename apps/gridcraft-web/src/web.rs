@@ -4,9 +4,12 @@ use gridcraft_engine::Session;
 use gridcraft_ui_egui::{Inbox, Services, SheetApp};
 use wasm_bindgen::JsCast as _;
 
+#[cfg(not(feature = "simplehub"))]
 const CANVAS_ID: &str = "gridcraft_canvas";
+#[cfg(not(feature = "simplehub"))]
 const LOADING_ID: &str = "gridcraft_loading";
 
+#[cfg(not(feature = "simplehub"))]
 pub fn start() {
     eframe::WebLogger::init(log::LevelFilter::Info).ok();
     wasm_bindgen_futures::spawn_local(async {
@@ -52,6 +55,7 @@ pub fn start() {
     });
 }
 
+#[cfg(not(feature = "simplehub"))]
 fn query() -> String {
     web_sys::window().and_then(|w| w.location().search().ok()).unwrap_or_default()
 }
@@ -90,6 +94,7 @@ impl eframe::App for WebShell {
     }
 }
 
+#[cfg(not(feature = "simplehub"))]
 fn services(inbox: Inbox, ctx: egui::Context) -> Services {
     let open_inbox = inbox.clone();
     Services {
@@ -122,6 +127,7 @@ fn services(inbox: Inbox, ctx: egui::Context) -> Services {
     }
 }
 
+#[cfg(not(feature = "simplehub"))]
 /// Triggers a browser download of `bytes`.
 fn download(name: &str, bytes: &[u8]) -> Result<(), String> {
     let js = |e: wasm_bindgen::JsValue| format!("{e:?}");
@@ -258,6 +264,3 @@ mod simplehub {
         Ok(())
     }
 }
-
-#[cfg(feature = "simplehub")]
-pub use simplehub::{SheetsHandle, start_simple_sheets};
