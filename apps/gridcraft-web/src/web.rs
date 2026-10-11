@@ -42,7 +42,7 @@ pub fn start() {
                     }
                     let app = SheetApp::new(session, services(inbox.clone(), cc.egui_ctx.clone()));
                     SheetApp::setup_context(&cc.egui_ctx, false);
-                    Ok(Box::new(WebShell { app, inbox }))
+                    Ok(Box::new(WebShell { app, inbox, theme: Default::default() }))
                 }),
             )
             .await;
@@ -60,13 +60,36 @@ fn query() -> String {
     web_sys::window().and_then(|w| w.location().search().ok()).unwrap_or_default()
 }
 
+/// A theme change requested from outside the frame loop (SimpleHub's `set_theme`). `dark` is
+/// taken by the shell on its next frame; `ctx` lets the requester ask for that frame.
+#[derive(Default)]
+struct ThemeLink {
+    dark: std::cell::Cell<Option<bool>>,
+    ctx: std::cell::RefCell<Option<egui::Context>>,
+}
+
+impl ThemeLink {
+    #[cfg_attr(not(feature = "simplehub"), allow(dead_code))]
+    fn request(&self, dark: bool) {
+        self.dark.set(Some(dark));
+        if let Some(ctx) = self.ctx.borrow().as_ref() {
+            ctx.request_repaint();
+        }
+    }
+}
+
 struct WebShell {
     app: SheetApp,
     inbox: Inbox,
+    theme: std::rc::Rc<ThemeLink>,
 }
 
 impl eframe::App for WebShell {
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        if let Some(dark) = self.theme.dark.take() {
+            // `SheetApp::logic` re-applies the tokens when `dark` differs from the context.
+            self.app.ui.dark = dark;
+        }
         let dropped = ctx.input_mut(|i| std::mem::take(&mut i.raw.dropped_files));
         for f in dropped {
             let inbox = self.inbox.clone();
@@ -158,7 +181,8 @@ fn download(name: &str, bytes: &[u8]) -> Result<(), String> {
 /// moves workbooks to and from Simple Cloud; nothing here touches the browser's file picker.
 #[cfg(feature = "simplehub")]
 mod simplehub {
-    use super::{Inbox, Services, Session, SheetApp, WebShell};
+    use super::{Inbox, Services, Session, SheetApp, ThemeLink, WebShell};
+    use std::rc::Rc;
     use wasm_bindgen::JsCast as _;
     use wasm_bindgen::prelude::*;
     use wasm_bindgen_futures::JsFuture;
@@ -167,6 +191,7 @@ mod simplehub {
     #[wasm_bindgen]
     pub struct SheetsHandle {
         runner: eframe::WebRunner,
+        theme: Rc<ThemeLink>,
     }
 
     #[wasm_bindgen]
@@ -178,12 +203,38 @@ mod simplehub {
         pub fn has_panicked(&self) -> bool {
             self.runner.has_panicked()
         }
+
+        /// Switches the running app to `"dark"` or `"light"` on its next frame. Other values are
+        /// ignored.
+        pub fn set_theme(&self, theme: &str) {
+            if let Some(dark) = parse_theme(theme) {
+                self.theme.request(dark);
+            }
+        }
     }
 
-    /// Starts Simple Sheets on `canvas`, with `bridge` providing open and save.
+    /// `"dark"` turns Simple Sheets' dark mode on, `"light"` turns it off.
+    fn parse_theme(theme: &str) -> Option<bool> {
+        match theme.trim().to_ascii_lowercase().as_str() {
+            "dark" => Some(true),
+            "light" => Some(false),
+            _ => None,
+        }
+    }
+
+    /// Starts Simple Sheets on `canvas`, with `bridge` providing open and save. An optional
+    /// `theme` property (`"dark"` or `"light"`) on the bridge picks the initial theme; without
+    /// it the app keeps its default (light).
     #[wasm_bindgen]
     pub async fn start_simple_sheets(canvas: web_sys::HtmlCanvasElement, bridge: JsValue) -> Result<SheetsHandle, JsValue> {
         eframe::WebLogger::init(log::LevelFilter::Info).ok();
+        let dark = js_sys::Reflect::get(&bridge, &JsValue::from_str("theme"))
+            .ok()
+            .and_then(|v| v.as_string())
+            .and_then(|s| parse_theme(&s))
+            .unwrap_or(false);
+        let theme = Rc::new(ThemeLink::default());
+        let link = theme.clone();
         let runner = eframe::WebRunner::new();
         runner
             .start(
@@ -191,13 +242,15 @@ mod simplehub {
                 eframe::WebOptions::default(),
                 Box::new(move |cc| {
                     let inbox: Inbox = Inbox::default();
-                    let app = SheetApp::new(Session::new(), services(bridge, inbox.clone(), cc.egui_ctx.clone()));
-                    SheetApp::setup_context(&cc.egui_ctx, false);
-                    Ok(Box::new(WebShell { app, inbox }))
+                    let mut app = SheetApp::new(Session::new(), services(bridge, inbox.clone(), cc.egui_ctx.clone()));
+                    app.ui.dark = dark;
+                    SheetApp::setup_context(&cc.egui_ctx, dark);
+                    *link.ctx.borrow_mut() = Some(cc.egui_ctx.clone());
+                    Ok(Box::new(WebShell { app, inbox, theme: link }))
                 }),
             )
             .await?;
-        Ok(SheetsHandle { runner })
+        Ok(SheetsHandle { runner, theme })
     }
 
     fn services(bridge: JsValue, inbox: Inbox, ctx: egui::Context) -> Services {

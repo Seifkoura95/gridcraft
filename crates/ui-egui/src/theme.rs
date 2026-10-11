@@ -317,6 +317,9 @@ pub fn font_definitions() -> FontDefinitions {
 }
 
 pub fn apply(ctx: &egui::Context, dark: bool) {
+    // Pin egui's theme so a system `prefers-color-scheme` change cannot swap in the
+    // stock visuals of the other mode: only the active mode is styled below.
+    ctx.set_theme(if dark { egui::Theme::Dark } else { egui::Theme::Light });
     let t = if dark { Tokens::dark() } else { Tokens::light() };
     let mut v = if dark { Visuals::dark() } else { Visuals::light() };
     v.panel_fill = t.window;
