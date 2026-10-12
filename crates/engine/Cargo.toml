@@ -24,3 +24,7 @@ gridcraft-xlsx = { workspace = true }
 gridcraft-chart = { workspace = true }
 gridcraft-pdf = { workspace = true }
 image = { workspace = true }
+
+[features]
+# SimpleHub build: files the engine writes name Simple Sheets as the software.
+simplehub = ["gridcraft-xlsx/simplehub", "gridcraft-pdf/simplehub"]

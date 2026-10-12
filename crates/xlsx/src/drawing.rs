@@ -150,7 +150,7 @@ pub fn read_drawing(cx: &mut Ctx<'_>, part: &str, sheet: &mut Sheet) -> Result<(
                             }
                         }
                     } else if uri.contains("chartex") || uri.contains("chartEx") {
-                        cx.warn("Excel 2016 chart types (histogram, waterfall, treemap…) are not supported yet and were skipped");
+                        cx.warn("Extended chart types (histogram, waterfall, treemap…) are not supported yet and were skipped");
                     } else {
                         cx.warn("an embedded object (SmartArt, OLE…) was skipped");
                     }

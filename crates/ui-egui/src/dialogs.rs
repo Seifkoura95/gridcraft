@@ -923,6 +923,7 @@ fn about(ui: &mut egui::Ui, d: &mut Dialog) {
             ui.label("Spreadsheets for SimpleHub. Native XLSX, 500+ functions, charts and PivotTables.");
             ui.add_space(4.0);
             ui.label("Built on GridCraft, an open source spreadsheet by the ArtCraft Team and the GridCraft contributors, used under the MIT or Apache 2.0 licence.");
+            ui.label("Not affiliated with or endorsed by Adobe, Microsoft, Autodesk or Avid. Other product names are trademarks of their respective owners.");
             ui.hyperlink_to("github.com/storytold/gridcraft", "https://github.com/storytold/gridcraft");
         }
         _ => {

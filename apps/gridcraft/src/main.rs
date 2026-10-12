@@ -97,7 +97,7 @@ fn services() -> Services {
         pick_open: Some(Box::new(|| {
             rfd::FileDialog::new()
                 .add_filter("Spreadsheets", &["xlsx", "xlsm", "csv", "tsv", "txt", "json"])
-                .add_filter("Excel Workbook", &["xlsx", "xlsm"])
+                .add_filter("Spreadsheet (*.xlsx, *.xlsm)", &["xlsx", "xlsm"])
                 .add_filter("CSV", &["csv"])
                 .pick_file()
                 .and_then(|p| p.to_str().map(str::to_string))
@@ -106,7 +106,7 @@ fn services() -> Services {
             let stem = std::path::Path::new(suggested).file_stem().and_then(|s| s.to_str()).unwrap_or("Book1").to_string();
             rfd::FileDialog::new()
                 .set_file_name(format!("{stem}.xlsx"))
-                .add_filter("Excel Workbook (.xlsx)", &["xlsx"])
+                .add_filter("Spreadsheet (*.xlsx)", &["xlsx"])
                 .add_filter("CSV UTF-8 (.csv)", &["csv"])
                 .add_filter("Web Page (.html)", &["html"])
                 .save_file()

@@ -10,6 +10,10 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 #![forbid(unsafe_code)]
 
+/// The application named in workbooks this crate writes (`docProps/app.xml`, pivot caches);
+/// Simple Sheets in the `simplehub` build.
+pub const APPLICATION: &str = if cfg!(feature = "simplehub") { "Simple Sheets" } else { "GridCraft" };
+
 mod chart;
 mod csv;
 mod drawing;

@@ -829,7 +829,7 @@ fn read_ext(cx: &mut Ctx<'_>, e: &El, sheet: &mut Sheet) {
                         }
                     }
                 }
-                "conditionalFormattings" => cx.warn("some Excel 2010 conditional format extensions were skipped"),
+                "conditionalFormattings" => cx.warn("some extended conditional format rules were skipped"),
                 _ => {}
             }
         }

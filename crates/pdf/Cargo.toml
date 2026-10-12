@@ -9,3 +9,7 @@ description = "GridCraft's tiny self-contained PDF 1.7 writer (standard 14 fonts
 workspace = true
 
 [dependencies]
+
+[features]
+# SimpleHub build: PDFs this crate writes name Simple Sheets as producer and creator.
+simplehub = []

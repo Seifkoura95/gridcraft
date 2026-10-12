@@ -15,3 +15,7 @@ gridcraft-model = { workspace = true }
 thiserror = { workspace = true }
 quick-xml = { workspace = true }
 zip = { workspace = true }
+
+[features]
+# SimpleHub build: workbooks this crate writes name Simple Sheets as the application.
+simplehub = []
